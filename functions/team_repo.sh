@@ -1,4 +1,8 @@
-create(){
+add_repo(){
+
+    # team_id = $1
+
+    # TODO: Add repo wise permission requirement to update accordingly
 	# Validation
 	repo_count=`wc -w < repos.txt`
 	if [ $repo_count -gt $GITHUB_MAX_REQUESTS ]
@@ -7,7 +11,7 @@ create(){
 		exit 1
 	fi
 
-	echo "Executing \"create\""
+	echo "Executing \"add_repo\""
 	CREATION_STATUS=""
 
 	# Keeps array index in check
@@ -23,33 +27,28 @@ create(){
 	failure_count=0
 
 	# Read repos.txt line by line
-	while p= read -r line; do
+	while p= read -r repo_name; do
 		
-		echo "Repo: $line"
+		echo "Repo: $repo_name"
 
 		# Making the API call and store the first line of info in res
-		res=`curl -i -s -XPOST -d "{\"owner\": \"$owner_name\", \"name\": \"$line\"}" https://api.github.com/repos/$template_owner/$template_name/generate -H "Accept: application/vnd.github.baptiste-preview+json" -H "Authorization: token $token" | head -1`
+		res=` curl -i -s -XPUT -d "{\"permission\": \"$\"}" https://api.github.com/orgs/$org_name/teams/$team_id/repos/$org_name/$repo_name -H "Accept: application/vnd.github.baptiste-preview+json" -H "Authorization: token $TOKEN" | head -1`
 
 		# Fetch HTTP status code
 		code=`echo $res | cut -d" " -f2`
 
-		# Fetch string indicating the HTTP response message
-		status_of_request=`echo $res | cut -d" " -f3-5`
-
 		# Checking if request succeeded
-		if [[ $code -eq 201 ]]
+		if [[ $code -eq 204 ]]
 		then
 			CREATION_STATUS=SUCCESS
-			url="https://github.com/$GITHUB_ORGANIZATION_OWNER/$line"
 			let "success_count++"
 		else 
 			CREATION_STATUS=FAILURE
-			url=""
 			let "failure_count++"
 		fi
 
 		# Store the JSON for the countrent iteration
-		result[$curr]=`echo { \"repo_name\": \"$line\", \"status\": \"$CREATION_STATUS\", \"order_of_execution\": $count, \"code\": $code, \"url\": \"$url\" } | jq`
+		result[$curr]='echo { \"repo_name\": \"$line\", \"status\": \"$CREATION_STATUS\", \"order_of_execution\": $count } | jq'
 
 		# Increment count, add a comma in the end
 		# Then increment it again for capturing the next object
@@ -72,7 +71,7 @@ create(){
 	# Support "write to file" 
 	if [[ $2 == "--out=json"  ]]
 	then
-		echo ${result[@]} > ./output/created_out.json
+		echo ${result[@]} > ./output/added_repo_out.json
 	else
 		echo ${result[@]}
 	fi
@@ -82,3 +81,23 @@ create(){
 	echo Total Count: $count
 
 }
+
+
+##  TODO: Get slug name from the team name
+
+# team_add(){
+
+# org_name=$GITHUB_ORGANIZATION_OWNER
+# res = `curl -i -s -XGET https://api.github.com/orgs/$org_name/teams -H "Accept: application/vnd.github.baptiste-preview+json" -H "Authorization: token $TOKEN" | head -1`
+
+# code=`echo $res | cut -d" " -f2`
+
+# # Checking if request succeeded
+# if [[ $code -eq 200 ]]
+# then
+#     echo "Fetched all the teams. Checking for slug name of the team"
+# else 
+#     echo "Error occured in fetching slug name"
+# fi
+  
+# }

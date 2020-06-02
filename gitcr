@@ -10,6 +10,7 @@ IFS=$'\n\t'
 . ./functions/create.sh
 . ./functions/revert.sh
 . ./functions/manual.sh
+. ./functions/team_repo.sh
 
 
 cli(){
@@ -23,7 +24,9 @@ cli(){
 		revert)
 			revert $@
 			;;
-
+		team_add)
+			add_repo
+			;;
 		*)
 		helpFunc
  		;;
