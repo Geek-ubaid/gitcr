@@ -1,7 +1,7 @@
 #!/bin/bash
-
 # Unofficial strict mode for bash
 # See http://redsymbol.net/articles/unofficial-bash-strict-mode/
+
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -25,7 +25,7 @@ cli(){
 			revert $@
 			;;
 		team_add)
-			add_repo
+			team_add
 			;;
 		*)
 		helpFunc
